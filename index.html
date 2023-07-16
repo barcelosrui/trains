@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        var trainStation = [
+            {idStation: "9431039", name: "Lisboa - Oriente"}, 
+            {idStation: "9431005", name: "Braço de Prata"}, 
+            {idStation: "9432185", name: "Santarém"}, 
+        ]
+
+        function createAndAppend(parent, type, append)
+        {
+            var nameCell = document.createElement(type);
+            nameCell.textContent = append;
+            parent.appendChild(nameCell);
+        }
+
+        function generateTable(data)
+        {
+            var tableBody = document.querySelector("#myTable tbody");
+
+            data.forEach(
+                item => 
+                {
+                    var row = document.createElement("tr");
+                    createAndAppend(row, "td", item.TipoServico);
+                    createAndAppend(row, "td", item.DataHoraPartidaChegada);
+                    createAndAppend(row, "td", item.NomeEstacaoOrigem);
+                    createAndAppend(row, "td", item.NomeEstacaoDestino);
+                    createAndAppend(row, "td", item.Observacoes);
+                    tableBody.appendChild(row);
+                }
+            );
+        }
+
+        function getJsonRequest(url) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+
+            xhr.onreadystatechange =
+                () => 
+                {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        var trains  = response.response[0].NodesComboioTabelsPartidasChegadas;
+                        generateTable(trains)                        
+                    }
+                };
+            xhr.send();
+        }
+
+        function updateSelector()
+        {
+            var selectElement = document.querySelector("#mySelect");
+            trainStation.forEach(
+                item => 
+                {
+                    var option = document.createElement("option");
+                    option.value = item.idStation;
+                    option.textContent = item.name;
+                    selectElement.appendChild(option);
+                }
+            );
+        }
+        
+        function getSelectedValue() {
+            var selectElement = document.querySelector("#mySelect");
+            return selectElement.value;
+        }
+
+        function clearTable() {
+            var tableBody = document.querySelector("#myTable tbody");
+            tableBody.innerHTML = "";
+        }
+        
+        function updateTable()
+        {
+            clearTable()
+            var stationId = getSelectedValue();
+            var datepickerBegin = document.getElementById("datepickerBegin").value;
+            var datepickerEnd = document.getElementById("datepickerEnd").value;
+            
+            getJsonRequest("https://www.infraestruturasdeportugal.pt/negocios-e-servicos/partidas-chegadas/" 
+                + stationId + "/" 
+                + datepickerBegin + "%2000:00/"
+                + datepickerEnd + "%2023:59/IR,%20REGIONAL,%20URB%7CSUBUR");
+        }
+
+        function updateInputData()
+        {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = String(currentDate.getMonth() + 1).padStart(2, "0");
+            var day = String(currentDate.getDate()).padStart(2, "0");
+            var formattedDate = year + "-" + month + "-" + day;
+            document.getElementById("datepickerBegin").value = formattedDate;
+            document.getElementById("datepickerEnd").value = formattedDate;
+        }
+    </script>
+    <title>Document</title>
+</head>
+
+<body>
+    <p>Estação: <select id="mySelect"></select></p>
+    <p>Início: <input type="date" id="datepickerBegin"></p>
+    <p>Fim: <input type="date" id="datepickerEnd"></p>
+    
+    <button onclick="updateTable()">Get</button>
+
+    <table id="myTable">
+        <thead>
+          <tr>
+            <th>Serviço</th>
+            <th>Partida</th>
+            <th>Origem</th>
+            <th>Destino</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+      <script>
+        updateSelector();
+        updateInputData();
+      </script>
+</body>
+
+</html>
