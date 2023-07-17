@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
         var trainStation = [
+            {idStation: "9432185", name: "Santarém"}, 
             {idStation: "9431039", name: "Lisboa - Oriente"}, 
             {idStation: "9431005", name: "Braço de Prata"}, 
-            {idStation: "9432185", name: "Santarém"}, 
         ]
 
         function createAndAppend(parent, type, append)
@@ -81,12 +81,19 @@
             clearTable()
             var stationId = getSelectedValue();
             var datepickerBegin = document.getElementById("datepickerBegin").value;
+            var hourBegin = document.getElementById("hourBegin").value;
             var datepickerEnd = document.getElementById("datepickerEnd").value;
+            var hourEnd = document.getElementById("hourEnd").value;
+
+            var services = getSelectedCheckboxes();
             
             getJsonRequest("https://www.infraestruturasdeportugal.pt/negocios-e-servicos/partidas-chegadas/" 
                 + stationId + "/" 
-                + datepickerBegin + "%2000:00/"
-                + datepickerEnd + "%2023:59/IR,%20REGIONAL,%20URB%7CSUBUR");
+                + datepickerBegin + "%20"
+                + hourBegin + "/"
+                + datepickerEnd + "%20"
+                + hourEnd + "/"
+                + services);
         }
 
         function updateInputData()
@@ -97,16 +104,67 @@
             var day = String(currentDate.getDate()).padStart(2, "0");
             var formattedDate = year + "-" + month + "-" + day;
             document.getElementById("datepickerBegin").value = formattedDate;
+            document.getElementById("hourBegin").value = "07:00";
             document.getElementById("datepickerEnd").value = formattedDate;
+            document.getElementById("hourEnd").value = "23:59";
+        }
+
+        function populateCheckboxes()
+        {
+            var data = [
+                { value: "ALFA", label: "Alfa" },
+                { value: "IC", label: "InterCidades" },
+                { value: "IR", label: "InterRegional" },
+                { value: "REGIONAL", label: "Regional" },
+                { value: "URB%7CSUBUR", label: "SubUrbano" },
+            ];
+
+            var checkboxContainer = document.getElementById("checkboxContainer");
+
+            data.forEach(function (item) {
+                var checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.name = "options"; // Set a common name for all checkboxes
+                checkbox.value = item.value;
+                checkbox.id = item.value;
+                checkbox.checked = true;
+
+                var label = document.createElement("label");
+                label.setAttribute("for", item.value);
+                label.textContent = item.label;
+
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(label);
+                checkboxContainer.appendChild(document.createElement("br"));
+            });
+        }
+        function getSelectedCheckboxes() {
+            var checkboxes = document.querySelectorAll("#checkboxContainer input[type='checkbox']");
+            var selectedValues = "";
+
+            checkboxes.forEach(
+                checkbox => 
+                {
+                    if (checkbox.checked) 
+                    {
+                        selectedValues += checkbox.value + ",%20";
+                    }
+                }
+            );
+            return selectedValues.substring(0, selectedValues.length - 4);
         }
     </script>
-    <title>Document</title>
+    <title>Portugal Trains Schedule</title>
 </head>
 
 <body>
     <p>Estação: <select id="mySelect"></select></p>
-    <p>Início: <input type="date" id="datepickerBegin"></p>
-    <p>Fim: <input type="date" id="datepickerEnd"></p>
+    <p>Início: <input type="date" id="datepickerBegin"><input type="text" id="hourBegin"></p>
+    <p>Fim: <input type="date" id="datepickerEnd"><input type="text" id="hourEnd"></p>
+
+    <div id="checkboxContainer">
+        <!-- The checkboxes will be appended here -->
+    </div>
     
     <button onclick="updateTable()">Get</button>
 
@@ -127,6 +185,7 @@
       <script>
         updateSelector();
         updateInputData();
+        populateCheckboxes();
       </script>
 </body>
 
