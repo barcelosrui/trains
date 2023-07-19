@@ -1,14 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         var trainStation = [
             {idStation: "9432185", name: "Santarém"}, 
             {idStation: "9431039", name: "Lisboa - Oriente"}, 
             {idStation: "9431005", name: "Braço de Prata"}, 
+            {idStation: "9466035", name: "Roma-Areeiro"}, 
+            {idStation: "9466050", name: "Entrecampos"}, 
+            {idStation: "9466076", name: "Sete-Rios"}, 
+            {idStation: "9460137", name: "Massamá-Barcarena"}, 
+            {idStation: "9462471", name: "Torres Vedras"}, 
+            {idStation: "9417087", name: "Pragal"}, 
+            {idStation: "9468007", name: "Pinhal Novo"}, 
         ]
 
         function createAndAppend(parent, type, append)
@@ -26,6 +35,7 @@
                 item => 
                 {
                     var row = document.createElement("tr");
+                    createAndAppend(row, "td", item.Operador);
                     createAndAppend(row, "td", item.TipoServico);
                     createAndAppend(row, "td", item.DataHoraPartidaChegada);
                     createAndAppend(row, "td", item.NomeEstacaoOrigem);
@@ -113,16 +123,17 @@
         {
             var data = [
                 { value: "ALFA", label: "Alfa" },
-                { value: "IC", label: "InterCidades" },
-                { value: "IR", label: "InterRegional" },
+                { value: "IC", label: "Inter-Cidades" },
+                { value: "IR", label: "Inter-Regional" },
                 { value: "REGIONAL", label: "Regional" },
-                { value: "URB%7CSUBUR", label: "SubUrbano" },
+                { value: "URB%7CSUBUR", label: "Sub-Urbano" },
             ];
 
             var checkboxContainer = document.getElementById("checkboxContainer");
 
             data.forEach(function (item) {
                 var checkbox = document.createElement("input");
+                checkbox.setAttribute("class", "form-check-input");
                 checkbox.type = "checkbox";
                 checkbox.name = "options"; // Set a common name for all checkboxes
                 checkbox.value = item.value;
@@ -131,6 +142,7 @@
 
                 var label = document.createElement("label");
                 label.setAttribute("for", item.value);
+                label.setAttribute("class", "form-check-label");
                 label.textContent = item.label;
 
                 checkboxContainer.appendChild(checkbox);
@@ -158,29 +170,75 @@
 </head>
 
 <body>
-    <p>Estação: <select id="mySelect"></select></p>
-    <p>Início: <input type="date" id="datepickerBegin"><input type="text" id="hourBegin"></p>
-    <p>Fim: <input type="date" id="datepickerEnd"><input type="text" id="hourEnd"></p>
-
-    <div id="checkboxContainer">
-        <!-- The checkboxes will be appended here -->
+    <nav class="navbar navbar-expand-sm bg-danger navbar-danger">
+        <div class="container-fluid">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+                <p class="nav-link active">Portugal Train Schedule</p>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-2"><p>Estação:</p></div>
+                    <div class="col-md-10"><select id="mySelect" class="form-select"></select></div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-2"><p>Início:</p></div>
+                    <div class="col-md-6"><input type="date" class="form-control" id="datepickerBegin"></div>
+                    <div class="col-md-4"><input type="text" class="form-control" id="hourBegin"></div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-2"><p>Fim:</p></div>
+                    <div class="col-md-6"><input type="date" class="form-control" id="datepickerEnd"></div>
+                    <div class="col-md-4"><input type="text" class="form-control" id="hourEnd"></div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-4"><p>Serviço:</p></div>
+                    <div class="col-md-8">
+                        <div id="checkboxContainer" class="form-check form-switch">
+                            <!-- The checkboxes will be appended here -->
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-primary" onclick="updateTable()">Get</button>
+                    </div>
+                </div>    
+                
+            </div>
+            <div class="col-md-8">
+                <div class="container">
+                    <table id="myTable" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Operador</th>
+                            <th>Serviço</th>
+                            <th>Partida</th>
+                            <th>Origem</th>
+                            <th>Destino</th>
+                            <th>Observações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <button onclick="updateTable()">Get</button>
 
-    <table id="myTable">
-        <thead>
-          <tr>
-            <th>Serviço</th>
-            <th>Partida</th>
-            <th>Origem</th>
-            <th>Destino</th>
-            <th>Observações</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
+    
 
       <script>
         updateSelector();
